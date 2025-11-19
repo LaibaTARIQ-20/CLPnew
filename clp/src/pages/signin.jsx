@@ -11,27 +11,19 @@ import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import { useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
 
 export default function Signin() {
   const navigate = useNavigate();
-  const [values, setValues] = React.useState({ email: "", password: "" });
-  const [error, setError] = React.useState("");
+  
+  const {
+    register,
+    handleSubmit,
+    formState: { errors }
+  } = useForm();
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setValues((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setError("");
-
-    if (!values.email || !values.password) {
-      setError("Please enter email and password.");
-      return;
-    }
-
-    console.log("Signing in with", values);
+  const onSubmit = (data) => {
+    console.log("Signing in with", data);
     navigate("/");
   };
 
@@ -86,20 +78,25 @@ export default function Signin() {
 
           <Box
             component="form"
-            onSubmit={handleSubmit}
+            onSubmit={handleSubmit(onSubmit)}
             sx={{ mt: 1, width: "100%" }}
           >
             <TextField
               margin="normal"
-              required
               fullWidth
               id="email"
               label="Email Address"
-              name="email"
               autoComplete="email"
               autoFocus
-              value={values.email}
-              onChange={handleChange}
+              {...register('email', {
+                required: 'Email is required',
+                pattern: {
+                  value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                  message: 'Please enter a valid email address'
+                }
+              })}
+              error={!!errors.email}
+              helperText={errors.email?.message}
               sx={{
                 "& .MuiOutlinedInput-root": {
                   "& fieldset": {
@@ -112,22 +109,26 @@ export default function Signin() {
                     borderColor: "#FF5722",
                   },
                 },
-                  '& .MuiInputLabel-root.Mui-focused': { color: '#FF5722' }
-
+                '& .MuiInputLabel-root.Mui-focused': { color: '#FF5722' }
               }}
             />
 
             <TextField
               margin="normal"
-              required
               fullWidth
-              name="password"
               label="Password"
               type="password"
               id="password"
               autoComplete="current-password"
-              value={values.password}
-              onChange={handleChange}
+              {...register('password', {
+                required: 'Password is required',
+                minLength: {
+                  value: 6,
+                  message: 'Password must be at least 6 characters'
+                }
+              })}
+              error={!!errors.password}
+              helperText={errors.password?.message}
               sx={{
                 "& .MuiOutlinedInput-root": {
                   "& fieldset": {
@@ -140,27 +141,26 @@ export default function Signin() {
                     borderColor: "#FF5722",
                   },
                 },
-                 '& .MuiInputLabel-root.Mui-focused': { color: '#FF5722' }
-
+                '& .MuiInputLabel-root.Mui-focused': { color: '#FF5722' }
               }}
             />
+
             <Grid container spacing={2} justifyContent="space-between" alignItems="center">
-               <FormControlLabel
-              control={
-                <Checkbox
-                  value="remember"
-                  color="primary"
-                  sx={{
-                    color: "#FF5722",
-                    "&.Mui-checked": {
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    {...register('rememberMe')}
+                    sx={{
                       color: "#FF5722",
-                    },
-                  }}
-                />
-              }
-              label="Remember me"
+                      "&.Mui-checked": {
+                        color: "#FF5722",
+                      },
+                    }}
+                  />
+                }
+                label="Remember me"
               />
-               <Grid item xs>
+              <Grid item xs>
                 <Link
                   href="/forgot-password"
                   variant="body2"
@@ -175,15 +175,7 @@ export default function Signin() {
                   Forgot password?
                 </Link>
               </Grid>
-              
-
             </Grid>
-           
-            {error && (
-              <Typography color="error" variant="body2" sx={{ mt: 1 }}>
-                {error}
-              </Typography>
-            )}
 
             <Button
               type="submit"
@@ -199,7 +191,7 @@ export default function Signin() {
                 fontWeight: "bold",
                 textTransform: "uppercase",
                 "&:hover": {
-                  backgroundColor: "#FF5722",
+                  backgroundColor: "#E64A19",
                 },
               }}
             >
